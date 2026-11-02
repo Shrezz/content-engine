@@ -35,6 +35,8 @@ class ScriptedDecisions:
 
     def ask(self, name, instructions, schema, data):
         self.calls.append((name, data))
+        if name == "resolve_brief" and name not in self.scripts and data.get("supplied_brief"):
+            return IntakeDecision(status="ready", brief=EditorialBrief.model_validate(data["supplied_brief"]))
         return self.scripts[name].pop(0)
 
 
@@ -124,6 +126,7 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(len(self.generated), 3)
         self.assertEqual(result["state"]["revision_count"], 2)
         self.assertIn("REVISION CONTEXT", self.generated[-1])
+        self.assertIn('"measured_article_word_counts": {"linkedin": 3, "medium": 4}', self.generated[-1])
         version = result["pending"]["version"]
         with self.assertRaisesRegex(ValueError, "Unresolved"):
             self.runtime.resume("test", {"action": "approve", "version": version})
@@ -202,6 +205,54 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(judged.claims[0].verdict, "unsupported")
         self.assertTrue(judged.needs_revision)
         self.assertEqual(judged.faithfulness, 3)
+
+    def test_evidence_ids_copy_exact_text_and_reject_unknown_ids_or_wrong_urls(self):
+        self.decisions.scripts["evaluate"] = [report(claims=[
+            dict(claim="Check application state", verdict="supported", evidence_id="S1P1", explanation="Source supports it"),
+            dict(claim="Invented reference", verdict="supported", evidence_id="S99P1", explanation="Invalid ID"),
+            dict(claim="Wrong source", verdict="supported", evidence_id="S1P1", source_url=str(SOURCES[1].url), explanation="Wrong URL"),
+        ])]
+        judged = DraftEvaluator(self.decisions).evaluate(EditorialBrief(**BRIEF), DRAFTS, SOURCES)
+        self.assertEqual(judged.claims[0].supporting_quote, SOURCES[0].content)
+        self.assertEqual(judged.claims[0].source_url, str(SOURCES[0].url))
+        self.assertEqual([c.verdict for c in judged.claims], ["supported", "unsupported", "unsupported"])
+        self.assertEqual(judged.faithfulness, 3)
+
+    def test_vague_structured_brief_waits_for_clarification_and_retains_original(self):
+        vague = dict(topic="AI agents", audience="Everyone", angle="An interesting angle", goal="Inform")
+        self.decisions.scripts["resolve_brief"] = [
+            IntakeDecision(status="clarify", question="Who is this for and what should it explain?", choices=["Engineers building agents", "Nontechnical readers"]),
+            IntakeDecision(status="ready", brief=EditorialBrief(**BRIEF)),
+        ]
+        pending = self.runtime.start("vague", brief=vague)
+        self.assertEqual(pending["pending"]["kind"], "clarification")
+        self.assertEqual(self.search.calls, [])
+        self.assertEqual(self.generated, [])
+        updated = self.runtime.resume("vague", {"answer": "Explain application-state checks to software engineers"})
+        self.assertEqual(updated["pending"]["kind"], "final_review")
+        payload = self.decisions.calls[-1][1]
+        self.assertEqual(payload["supplied_brief"], vague)
+        self.assertEqual(payload["conversation"][-1]["content"], "Explain application-state checks to software engineers")
+
+    def test_attributed_inaccurate_quote_is_rejected_but_hypothetical_dialogue_is_not(self):
+        self.decisions.scripts["evaluate"] = [report(), report()]
+        evaluator = DraftEvaluator(self.decisions)
+        quote = 'As one guide puts it: *“A source quotation that does not exist anywhere in the evidence.”* [Evidence](https://example.org/0)'
+        bad = evaluator.evaluate(EditorialBrief(**BRIEF), DRAFTS.model_copy(update={"medium": quote}), SOURCES)
+        self.assertEqual(bad.faithfulness, 3)
+        self.assertTrue(any(c.verdict == "unsupported" and c.claim.startswith("Direct quotation") for c in bad.claims))
+        scene = 'Imagine a user typing: “Please update the household chore schedule for next week.” [Evidence](https://example.org/0)'
+        hypothetical = evaluator.evaluate(EditorialBrief(**BRIEF), DRAFTS.model_copy(update={"medium": scene}), SOURCES)
+        self.assertEqual(hypothetical.faithfulness, 4)
+        self.assertEqual(hypothetical.claims, [])
+
+    def test_broad_audience_writer_fallback_discloses_scope_in_both_articles(self):
+        brief = EditorialBrief(topic="AI", audience="Everyone", angle="Cover everything important", goal="Make it useful")
+        result = self.nodes.writer({"brief": brief, "sources": SOURCES})["drafts"]
+        for text in (result.linkedin, result.medium):
+            self.assertTrue(text.startswith("Scope note:"))
+            self.assertIn("working interpretation", text)
+        self.assertIn(DRAFTS.medium, result.medium)
 
     def test_failed_search_is_reported_and_retried_from_its_checkpoint(self):
         self.search.search = Mock(side_effect=[RuntimeError("Controlled provider failure"), SOURCES])

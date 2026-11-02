@@ -126,7 +126,7 @@ def render_article(text, key=None, assets=()):
 
 def summary(snapshot, job=None):
     state, pending = snapshot["state"], snapshot.get("pending") or {}
-    brief = state.get("brief", {})
+    brief = state.get("brief") or state.get("submitted_brief") or {}
     first = next((c["content"] for c in state.get("conversation", []) if c["role"] == "user"), "Untitled article")
     status = snapshot["status"]
     if status not in {"approved", "cancelled"} and job and job.get("status") in {"queued", "running", "failed"}:

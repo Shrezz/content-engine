@@ -85,7 +85,7 @@ function articleAssessments(d) {
 }
 
 function datasetRuns(d) {
-  return `<div class="eval-section-head"><div><h2>Test the workflow against a fixed set.</h2><p>${esc(d.dataset.version)} · ${d.dataset.cases.length} cases · frozen evidence</p></div></div><div class="banner"><div><strong>Candidate references need human approval.</strong><p>Suite pass rate measures whether the expected behavior and rubric checks pass. It is separate from article precision / recall. Dev cases are for tuning; reserve test cases for checks after changes.</p></div></div>
+  return `<div class="eval-section-head"><div><h2>Test the workflow against a fixed set.</h2><p>${esc(d.dataset.version)} · ${d.dataset.cases.length} cases · frozen evidence</p></div></div><div class="banner"><div><strong>${esc(d.dataset.reference_status)}</strong><p>Suite pass rate measures whether the expected behavior and rubric checks pass. It is separate from article precision / recall. Dev cases are for tuning; reserve test cases for checks after changes.</p></div></div>
     ${d.runs.length ? `<div class="dataset-grid">${d.runs.map((r) => `<section class="dataset-card"><div class="picture-top"><span class="eyebrow">${esc(r.selection.split)} SPLIT</span><span class="badge ${r.status === "completed" ? "" : "amber"}">${esc(r.status)}</span></div><div class="dataset-result"><strong>${r.total ? `${r.passed}<span> / ${r.total}</span>` : "—"}</strong><span>${r.total ? `${rate(r.pass_rate)} cases passed` : "Waiting for a completed result"}</span></div>${r.total ? `<progress max="${r.total}" value="${r.passed}" aria-label="Cases passed"></progress>` : ""}<p>${esc(r.model || "Configured model")}<br>${evalDate(r.created_at)}</p>${r.baseline_total ? `<p class="baseline-note">Initial draft baseline: ${r.baseline_passed}/${r.baseline_total} writing cases passed.</p>` : ""}${r.error ? `<p class="finding error">${esc(r.error)}</p>` : ""}<div class="history-footer"><small>${r.prompt_fingerprint ? `Prompts ${esc(r.prompt_fingerprint.slice(0, 8))}` : "Saved report · prompt version unknown"}</small><button class="text-button" data-eval-run="${esc(r.id)}">Inspect run ${icon("arrow")}</button></div></section>`).join("")}</div>` : '<div class="paper empty-small">No dataset runs saved yet. Choose a small dev case to begin.</div>'}`;
 }
 
@@ -137,7 +137,7 @@ function runEvalModal() {
     "RUN A FROZEN DATASET",
     "Give the workflow a test.",
     "This uses your configured LLM and model credits. Research comes from frozen fixtures; no new web search runs.",
-    `<form id="eval-run"><div class="field"><label for="eval-split">Dataset split</label><select name="split" id="eval-split"><option value="dev">Dev · tune and inspect</option><option value="test">Test · held-out check</option><option value="all">All · development and test</option></select></div><fieldset class="eval-case-select"><legend>Cases to run</legend><div id="eval-case-options"></div></fieldset><label class="checkbox-label"><input type="checkbox" name="baseline"><span>Also grade the initial draft as a baseline for writing cases (extra model calls).</span></label><p class="modal-note">References are still candidates. Each case gets a 0/1 result and an explanation; this run does not create human article labels.</p><div class="form-actions"><button class="primary" type="submit" ${S.evals.runs.some((r) => ["running", "queued"].includes(r.status)) || !S.configured ? "disabled" : ""}>Run selected cases ${icon("arrow")}</button><button class="text-button" type="button" data-action="close">Cancel</button></div></form>`,
+    `<form id="eval-run"><div class="field"><label for="eval-split">Dataset split</label><select name="split" id="eval-split"><option value="dev">Dev · tune and inspect</option><option value="test">Test · held-out check</option><option value="all">All · development and test</option></select></div><fieldset class="eval-case-select"><legend>Cases to run</legend><div id="eval-case-options"></div></fieldset>${d.supports_baseline ? '<label class="checkbox-label"><input type="checkbox" name="baseline"><span>Also grade the initial draft as a baseline for writing cases (extra model calls).</span></label>' : ''}<p class="modal-note">Each case gets a 0/1 result and an explanation. Human article labels remain separate from benchmark expectations.</p><div class="form-actions"><button class="primary" type="submit" ${S.evals.runs.some((r) => ["running", "queued"].includes(r.status)) || !S.configured ? "disabled" : ""}>Run selected cases ${icon("arrow")}</button><button class="text-button" type="button" data-action="close">Cancel</button></div></form>`,
   );
   renderEvalCases();
 }
@@ -164,7 +164,7 @@ async function readEvalRun(key) {
       : run.error || "Close this dialog to see updated run status.",
     report
       ? `
-    <p class="modal-note">Pass requires the expected route, runtime quality checks, and every reference criterion. Candidate references and model-judged checks are provisional.</p>
+    <p class="modal-note">Pass requires the expected route, runtime quality checks, and every reference criterion. Model-judged checks remain provisional; inspect their explanations.</p>
     ${report.cases.map(renderEvalCase).join("")}`
       : '<p class="modal-note">The run is saved and will remain visible if you leave this page.</p>',
   );

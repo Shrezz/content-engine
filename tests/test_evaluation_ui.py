@@ -24,7 +24,7 @@ class EvaluationUITests(unittest.TestCase):
         d = self.client.get("/api/evals").json()
         self.assertEqual(d["metrics"]["total"],1)
         self.assertIsNone(d["metrics"]["precision"])
-        self.assertEqual(len(d["dataset"]["cases"]),7)
+        self.assertEqual(len(d["dataset"]["cases"]),32)
         self.assertEqual(d["runs"],[])
 
     def test_manual_quality_rating_updates_metrics_without_approving_export(self):
@@ -70,7 +70,7 @@ class EvaluationUITests(unittest.TestCase):
                 return {"dataset_version":"fixture", "reference_status":"candidate", "model":"fake", "split":selection["split"], "total":1,"passed":1,"pass_rate":1,"cases":[{"id":selection["case_ids"][0],"passed":True}]}
         self.app.state.benchmarks.factory = FakeEvaluator
         case = next(c for c in self.client.get("/api/evals").json()["dataset"]["cases"] if c["split"] == "dev")
-        response = self.post("/api/evals/runs", {"split":"dev","case_ids":[case["id"]],"compare_baseline":True})
+        response = self.post("/api/evals/runs", {"split":"dev","case_ids":[case["id"]],"compare_baseline":False})
         self.assertEqual(response.status_code,202,response.text)
         key = response.json()["id"]
         deadline = time.monotonic()+5
@@ -80,7 +80,7 @@ class EvaluationUITests(unittest.TestCase):
             time.sleep(.01)
         self.assertEqual(run["status"],"completed",run)
         self.assertEqual(run["report"]["passed"],1)
-        self.assertTrue(calls[0]["compare_baseline"])
+        self.assertFalse(calls[0]["compare_baseline"])
         self.assertTrue((self.fixture.settings.data_dir / "evaluations" / f"{key}.json").is_file())
         self.assertEqual(self.client.get("/api/evals").json()["metrics"]["reviewed"],0)
 

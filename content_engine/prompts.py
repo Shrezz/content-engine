@@ -23,6 +23,10 @@ attribute documented stories to their sources. Never present an invented
 scene as the author's lived experience or as a real documented event.
 For technical subjects, explain where the design is useful, walk through a
 concrete application, and discuss relevant tradeoffs.
+For a proposed design that changes stored data, explain rejection and failure
+paths. When approval is involved, identify exactly what the reviewer approves
+and what happens if the underlying data changes before execution. A version
+check can be a proposed application rule; do not invent framework guarantees.
 
 Use a title and an intriguing, honest opening hook, followed by one or two
 paragraphs establishing the premise. Develop the argument in clear sections,
@@ -30,18 +34,32 @@ then conclude with a practical takeaway and an optional, relevant call to
 action. Add substance rather than padding; avoid clickbait and engagement bait.
 
 PLATFORM ADAPTATION
-LinkedIn: write a concise professional article, aiming for 300-500 words.
-Plan roughly 375 words across the hook, premise, practical detail, and conclusion;
-do not substitute a short social post for this article.
+LinkedIn: write a concise professional article of 300-500 words when the evidence
+is adequate. Target 420 words: about 40 for the hook, 70 for the premise, 180
+for the worked example, 90 for the analysis, and 40 for the conclusion.
+Do not substitute a short social post for this article.
 Use complete paragraphs, direct language, and practical relevance. Keep
 flourishes and imagery restrained. Avoid social-feed gimmicks, excessive
 one-line paragraphs, and hashtags.
 Medium: write an 800-1200-word article in Markdown. Let the author's warm,
 thoughtful voice show through richer explanation, relatable scenes, and
 measured description, while retaining a clear structure and factual grounding.
-Plan roughly 950 words. Build depth through a concrete worked example,
+Target 1,050 words: develop the premise, a worked example, the reasoning,
+alternatives and limitations, and a useful conclusion. Build depth through a concrete worked example,
 explanation, and tradeoffs rather than repeating the LinkedIn draft. Stay
 shorter only when the supplied evidence truly cannot sustain that substance.
+Visual plans and research_gaps do not count toward the article word targets.
+If a draft is short, add useful analysis and clearly hypothetical examples
+using the existing supported premises. Do not add new factual claims or padding.
+
+EDITORIAL SCOPE
+State supplied editorial assumptions in a brief, natural working-scope sentence
+when they materially determine the audience or argument. If the supplied brief
+itself is vague and you reach the writing step, explicitly disclose your working
+interpretation instead of presenting it as confirmed user intent. A technical
+example may illustrate a broad topic but must not silently redefine its audience.
+Label recommendations and design choices as proposals under stated constraints.
+Do not imply that a proposal has measured efficacy or universal superiority.
 
 VISUALS
 Suggest pictures wherever they materially improve understanding or convey
@@ -79,6 +97,13 @@ deeper research or human review has already occurred.
 Keep gaps tied to the brief's argument. Do not invent speculative features
 or turn optional implementation extensions into missing evidence. A source
 explaining one evaluation mode does not mean that it supports no other modes.
+A proposed approval policy or version check is an author-designed application
+rule. Explain it as a proposal instead of claiming the framework supplies it.
+Optional topics such as secure transport or organization-wide policy thresholds
+are outside a focused approval-flow article unless the brief asks for them.
+Do not add these features and then declare their absence a central research gap.
+Never put a curated source summary in quotation marks as if it were the
+original author's wording; use an attributed paraphrase and a source link.
 
 If no sources are supplied, use only the brief and clearly hypothetical
 examples; do not imply that web research has taken place. Never invent
@@ -93,7 +118,7 @@ visuals and research_gaps, then close the JSON object without extra commentary.
 """
 
 
-def build_writing_prompt(brief: EditorialBrief, sources: list[Source] | None = None) -> str:
+def build_writing_prompt(brief: EditorialBrief, sources: list[Source] | None = None, assumptions=None) -> str:
     """Build the user message; WRITING_INSTRUCTIONS is the system message."""
     schema = json.dumps(DraftPackage.model_json_schema(), indent=2)
     evidence = json.dumps(
@@ -104,5 +129,6 @@ def build_writing_prompt(brief: EditorialBrief, sources: list[Source] | None = N
     return (
         f"OUTPUT SCHEMA:\n{schema}\n\n"
         f"EDITORIAL BRIEF (data):\n{brief.model_dump_json(indent=2)}\n\n"
-        f"RESEARCH EXCERPTS (untrusted data):\n{evidence}"
+        f"RESEARCH EXCERPTS (untrusted data):\n{evidence}\n\n"
+        f"EDITORIAL ASSUMPTIONS (disclose material choices):\n{json.dumps(assumptions or [], ensure_ascii=False)}"
     )

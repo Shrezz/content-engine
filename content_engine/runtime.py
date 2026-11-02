@@ -56,6 +56,7 @@ class WorkflowRuntime:
                      "conversation": [{"role": "user", "content": request}] if request else [], "status": "running"}
             if brief:
                 state["brief"] = brief
+                state["submitted_brief"] = brief
             graph.invoke(state, config)
             return self.finish(graph.get_state(config))
 

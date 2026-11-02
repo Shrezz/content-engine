@@ -21,7 +21,8 @@ class WorkflowState(TypedDict, total=False):
     thread_id: str
     request: str
     conversation: list[dict]
-    brief: dict
+    brief: dict | None
+    submitted_brief: dict
     intake: dict
     assumptions: list[str]
     novelty: dict

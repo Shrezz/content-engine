@@ -97,7 +97,8 @@ class NoveltyDecision(DecisionModel):
 
 class ClaimCheck(DecisionModel):
     claim: str
-    verdict: Literal["supported", "unsupported", "conflicting"]
+    verdict: Literal["supported", "unsupported", "conflicting", "not_applicable"]
+    evidence_id: str | None = None
     source_url: str | None = None
     supporting_quote: str | None = None
     explanation: str
@@ -125,3 +126,16 @@ class EvaluationReport(DecisionModel):
         return any(i.severity == "error" for i in self.issues) or min(
             self.faithfulness, self.substance, self.voice, self.structure
         ) < 4
+
+
+class EvidenceFinding(DecisionModel):
+    """The model selects evidence; code copies the quotation and URL."""
+
+    claim: str
+    verdict: Literal["supported", "unsupported", "conflicting", "not_applicable"]
+    evidence_id: str | None
+    explanation: str
+
+
+class EvidenceEvaluation(EvaluationReport):
+    claims: list[EvidenceFinding]

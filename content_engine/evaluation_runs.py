@@ -19,7 +19,7 @@ class EvaluationRuns:
         self.settings = settings
         self.store = ReviewMetrics(settings.metrics_db)
         self.factory = evaluator_factory
-        self.dataset_path = dataset_path or PROJECT_DIR / "evals" / "golden.json"
+        self.dataset_path = dataset_path or PROJECT_DIR / "evals" / "golden-v0.4.json"
         self.lock = Lock()
         self.pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="benchmark")
         with self.store.connect() as db:
@@ -39,6 +39,7 @@ class EvaluationRuns:
     def catalog(self):
         dataset = json.loads(self.dataset_path.read_text())
         return {"version": dataset["version"], "reference_status": dataset.get("reference_status", "unreviewed"),
+                "supports_baseline": not any("execution" in c for c in dataset["cases"]),
                 "cases": [{"id": c["id"], "split": c["split"], "target": c["target"]} for c in dataset["cases"]]}
 
     def import_report(self, path):
@@ -81,6 +82,8 @@ class EvaluationRuns:
 
     def launch(self, *, split="dev", compare_baseline=False, case_ids=None):
         catalog = self.catalog()
+        if compare_baseline and not catalog["supports_baseline"]:
+            raise ValueError("This suite grades complete workflows and component behavior; paired initial-draft baselines are not available")
         eligible = {c["id"] for c in catalog["cases"] if split == "all" or c["split"] == split}
         if not eligible or (case_ids is not None and (not case_ids or not set(case_ids) <= eligible)):
             raise ValueError("Select existing cases within the chosen split")

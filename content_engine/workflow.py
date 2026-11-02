@@ -29,16 +29,17 @@ class WorkflowNodes:
 
     def intake(self, state):
         with self.trace.span("intake", "node", inputs=state.get("conversation")) as event:
-            if state.get("brief"):
-                brief = EditorialBrief.model_validate(state["brief"])
-                decision = IntakeDecision(status="ready", brief=brief)
-            else:
-                decision = self.decisions.ask("resolve_brief", INTAKE_INSTRUCTIONS, IntakeDecision,
-                                              {"conversation": state["conversation"]})
+            data = {"conversation": state.get("conversation", [])}
+            supplied = state.get("submitted_brief") or state.get("brief")
+            if supplied:
+                data["supplied_brief"] = EditorialBrief.model_validate(supplied).model_dump()
+            decision = self.decisions.ask("resolve_brief", INTAKE_INSTRUCTIONS, IntakeDecision, data)
             decision = with_delegation_choice(decision)
             update = {"intake": decision.model_dump(mode="json"), "assumptions": decision.assumptions}
             if decision.brief:
                 update["brief"] = decision.brief.model_dump()
+            else:
+                update["brief"] = None
             event["outputs"] = update
             return update
 
@@ -119,7 +120,8 @@ class WorkflowNodes:
 
     def write(self, state):
         writer_state = {"brief": EditorialBrief.model_validate(state["brief"]),
-                        "sources": [Source.model_validate(s) for s in state["sources"]]}
+                        "sources": [Source.model_validate(s) for s in state["sources"]],
+                        "assumptions": state.get("assumptions", [])}
         if state.get("drafts"):
             writer_state.update(previous_drafts=state["drafts"], evaluation=state.get("evaluation"), feedback=state.get("feedback", ""))
         drafts = self.writer(writer_state)["drafts"]

@@ -25,7 +25,7 @@ class Decisions:
         if name == "golden_intake":
             return IntakeDecision(status="clarify", question="Which direction?", choices=["Practical", "Scientific"])
         criteria = data["reference_criteria"]
-        return ReferenceGrade(checks=[dict(criterion=c, passed=True, reason="Controlled test grader") for c in (criteria[:1] if self.omit_criterion else criteria)])
+        return ReferenceGrade(checks=[dict(criterion=c, verdict="met", reason="Controlled test grader") for c in (criteria[:1] if self.omit_criterion else criteria)])
 
 
 class Evaluator:
@@ -78,6 +78,15 @@ class EvaluationTests(unittest.TestCase):
         self.runner.decisions.omit_criterion = True
         with self.assertRaisesRegex(ValueError, "omitted"):
             self.runner._grade(["One", "Two"], {}, {})
+
+    def test_critic_grader_receives_role_separately_from_flawed_input(self):
+        inputs = {"drafts": {"medium": "Deliberately unsupported claim"}}
+        self.runner._grade(["Flags the unsupported claim"], {"claims": [{"verdict": "unsupported"}]}, inputs,
+                           evaluation_target="critic")
+        data = self.runner.decisions.calls[-1][1]
+        self.assertEqual(data["evaluation_target"], "critic")
+        self.assertEqual(data["original_input"], inputs)
+        self.assertNotIn("evaluation", data["actual_output"])
 
     def test_split_and_case_filters_do_not_run_development_examples(self):
         with tempfile.TemporaryDirectory() as temp:
