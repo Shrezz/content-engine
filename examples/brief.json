@@ -1,0 +1,6 @@
+{
+  "topic": "Evaluating AI agents",
+  "audience": "Software engineers building their first tool-using agent",
+  "angle": "Use final application state as the core measure of task completion",
+  "goal": "Explain one practical evaluation approach using a concrete example"
+}

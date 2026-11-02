@@ -1,0 +1,12 @@
+{
+  "name": "content-engine-visuals",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@resvg/resvg-js": "2.6.2",
+    "beautiful-mermaid": "1.1.3"
+  },
+  "devDependencies": {
+    "prettier": "3.9.10"
+  }
+}

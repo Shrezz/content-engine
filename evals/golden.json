@@ -1,0 +1,92 @@
+{
+  "version": "0.1-candidate-2026-11-01",
+  "reference_status": "candidate; human review required before treating these references as gold",
+  "description": "Runnable seed fixtures for intake and technical writing. The 36-scenario Excel workbook remains the broader coverage plan. Content below is a curated summary, not a verbatim page excerpt. No live search runs during these component evaluations.",
+  "sources": {
+    "workflows": {
+      "frozen_at": "2026-11-01", "method": "curated summary of official source", "review_status": "candidate",
+      "source": {
+        "title": "Building effective agents — Anthropic",
+        "url": "https://www.anthropic.com/research/building-effective-agents",
+        "content": "Curated summary, not a verbatim excerpt: Anthropic distinguishes workflows, in which code defines the paths through model and tool calls, from agents, in which a model dynamically directs its process and tool use. It recommends starting with simple patterns and adding complexity when it measurably improves results. Common workflow patterns include routing, parallelization, orchestrator-workers, and evaluator-optimizer. An evaluator-optimizer loop generates a candidate, evaluates it against clear criteria, and uses feedback to improve it. Loops are most useful when quality criteria are explicit and feedback can improve the result; they add latency and cost."
+      }
+    },
+    "interrupts": {
+      "frozen_at": "2026-11-01", "method": "curated summary of official source", "review_status": "candidate",
+      "source": {
+        "title": "LangGraph interrupts",
+        "url": "https://docs.langchain.com/oss/python/langgraph/interrupts",
+        "content": "Curated summary, not a verbatim excerpt: LangGraph interrupt pauses execution and exposes a serializable payload to the caller. Durable human review requires a checkpointer and a thread_id. The application resumes the same thread using Command(resume=...), and the response becomes the interrupt return value. The node restarts from its beginning on resume, so work before interrupt can run again. Side effects before an interrupt should be idempotent or placed in a separate node. Human responses can approve a tool action or provide revised data, but the application must implement its own validation and business rules."
+      }
+    },
+    "persistence": {
+      "frozen_at": "2026-11-01", "method": "curated summary of official source", "review_status": "candidate",
+      "source": {
+        "title": "LangGraph persistence",
+        "url": "https://docs.langchain.com/oss/python/langgraph/persistence",
+        "content": "Curated summary, not a verbatim excerpt: A LangGraph checkpointer saves graph state as checkpoints associated with a thread. A thread_id selects the persisted execution history. Persisted state enables human interaction, inspecting prior state, and fault recovery. These capabilities do not make arbitrary external side effects transactional or exactly once. A checkpointer should remain available across process restarts if the application must resume later. Checkpoint storage and an application's business records serve different purposes and can be stored separately."
+      }
+    },
+    "traces": {
+      "frozen_at": "2026-11-01", "method": "curated summary of official source", "review_status": "candidate",
+      "source": {
+        "title": "OpenTelemetry traces",
+        "url": "https://opentelemetry.io/docs/concepts/signals/traces/",
+        "content": "Curated summary, not a verbatim excerpt: A trace records the path of a request across operations. Spans represent operations and have start and end timestamps, identifiers, attributes, events, and status. Parent-child relationships connect spans within a trace. A failed tool call can be represented by an error status or event, helping an engineer locate a failure and inspect duration. A successful span says that the operation completed as instrumented; it does not by itself prove that an AI agent achieved the user's intended business outcome. Trace instrumentation can record sensitive inputs, so applications should choose what they store and redact secrets."
+      }
+    },
+    "datasets": {
+      "frozen_at": "2026-11-01", "method": "curated summary of official source", "review_status": "candidate",
+      "source": {
+        "title": "LangSmith evaluation concepts",
+        "url": "https://docs.langchain.com/langsmith/evaluation-concepts",
+        "content": "Curated summary, not a verbatim excerpt: An evaluation dataset contains example inputs and can contain reference outputs and metadata. Reference outputs are used by evaluators rather than supplied as inputs to the application being tested. Evaluators can use code, a model, or human judgment to assess outputs. Offline evaluation runs an application against a dataset and compares experiments. Curating representative examples and reviewing evaluator behavior are part of building a useful evaluation process. A model score is a judgment under a rubric, not an objective guarantee of factual truth."
+      }
+    },
+    "outcomes": {
+      "frozen_at": "2026-11-01", "method": "curated summary of official source", "review_status": "candidate",
+      "source": {
+        "title": "How to evaluate AI agents — NVIDIA",
+        "url": "https://developer.nvidia.com/blog/how-to-evaluate-ai-agents-from-tool-calls-to-task-completion",
+        "content": "Curated summary, not a verbatim excerpt: Agent evaluation should assess whether the system completed the intended task across a sequence of actions. Final text and individual tool calls give only part of the picture. Checking the resulting environment or application state can establish whether a task was completed, such as whether the intended record or change exists. Tool correctness and process metrics help diagnose failures, while task completion addresses the outcome. Evaluation design depends on the task and available verification signals; there is no single text-only score that proves every agent succeeded."
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "INT-001", "split": "dev", "target": "intake", "expected_status": "clarify",
+      "inputs": {"conversation": [{"role": "user", "content": "Write an article on meditation."}]},
+      "criteria": ["Asks one focused question about the direction or intended reader, rather than returning an article.", "Offers useful directions and a choice to delegate to the agent.", "Does not invent the author's personal meditation experiences."]
+    },
+    {
+      "id": "INT-002", "split": "test", "target": "intake", "expected_status": "clarify",
+      "inputs": {"conversation": [{"role": "user", "content": "I want to write something about AI. Not sure what yet."}]},
+      "criteria": ["Asks one focused clarifying question and leaves the brief unset.", "Provides concrete directions rather than asking the user to fill in all four brief fields.", "Offers a choice to let the agent choose."]
+    },
+    {
+      "id": "INT-003", "split": "dev", "target": "intake", "expected_status": "ready",
+      "inputs": {"conversation": [{"role": "user", "content": "Write about meditation. You choose a practical angle and audience for me."}]},
+      "criteria": ["Returns a complete brief with a specific practical angle and audience.", "Discloses inferred choices in assumptions without asking for approval again.", "Avoids inventing personal experience or promising medical benefits."]
+    },
+    {
+      "id": "INT-004", "split": "test", "target": "intake", "expected_status": "ready",
+      "inputs": {"conversation": [{"role": "user", "content": "Write an article on meditation."}, {"role": "assistant", "content": "Who should it help and what direction interests you?"}, {"role": "user", "content": "Busy parents who can spare five minutes. Focus on making a small habit stick, without medical promises."}]},
+      "criteria": ["Uses busy parents, a five-minute practice, and building a habit in the finalized brief.", "Preserves the user's constraint against medical promises.", "Does not repeat the question after sufficient clarification."]
+    },
+    {
+      "id": "INT-005", "split": "test", "target": "intake", "expected_status": "ready",
+      "inputs": {"conversation": [{"role": "user", "content": "Explain to software engineers why an agent's final message is insufficient for evaluation; show how checking a refund record gives a better signal. Help readers design a first task-completion check."}]},
+      "criteria": ["Returns a ready brief for software engineers with final state verification as the angle.", "Retains the concrete refund verification use case and a practical teaching goal.", "Does not require clarification about already-known platform voice preferences."]
+    },
+    {
+      "id": "WRITE-001", "split": "dev", "target": "writing", "expected_decision": "human_review",
+      "inputs": {"brief": {"topic": "Human review for an article-writing workflow", "audience": "Software engineers building a first LangGraph application", "angle": "Pause for review, resume the same thread, and keep export separate from approval", "goal": "Explain a minimal, practical approval flow and its failure cases"}, "source_ids": ["workflows", "interrupts", "persistence", "traces", "datasets", "outcomes"]},
+      "criteria": ["Explains interrupt, a durable checkpointer, the same thread_id, and Command(resume=...) without claiming that an in-memory pause survives process restarts.", "Gives a concrete writing or export example and explains why side effects before an interrupt must be idempotent or separated.", "Treats exact-version approval and application validation as proposed application rules rather than built-in LangGraph guarantees.", "LinkedIn is a professional article and Medium adds practical depth with a useful technical diagram plan.", "Does not invent personal biography, numerical performance gains, or research findings absent from the frozen evidence."]
+    },
+    {
+      "id": "WRITE-002", "split": "test", "target": "writing", "expected_decision": "human_review",
+      "inputs": {"brief": {"topic": "Evaluating an AI agent beyond fluent responses", "audience": "Software engineers shipping a first tool-using agent", "angle": "Use a refund task to distinguish final state checks from tool traces", "goal": "Help readers choose a first deterministic success check and use traces to diagnose failures"}, "source_ids": ["workflows", "interrupts", "persistence", "traces", "datasets", "outcomes"]},
+      "criteria": ["Uses a clearly illustrative refund scenario and checks an observable application result rather than trusting a fluent completion message.", "Explains that tool traces help diagnose a run but do not alone prove business task completion.", "Separates evaluator-only reference criteria from inputs given to the writing application.", "Presents practical checks and meaningful limits without fabricated benchmarks or universal guarantees.", "Both platforms follow the requested structure, and Medium includes a useful diagram plan consistent with the explanation."]
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#234c3d" />
+    <meta
+      name="description"
+      content="A considered space to research, write, and review your next article."
+    />
+    <title>Content Engine · Editorial workspace</title>
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/static/style.css" />
+    <script src="/static/app.js" defer></script>
+    <script src="/static/evals.js" defer></script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to workspace</a>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Workspace navigation">
+        <a class="brand" href="/" aria-label="Content Engine home"
+          ><span class="brand-mark">ce<span>·</span></span
+          ><span>Content<br /><strong>Engine</strong></span></a
+        >
+        <div class="workspace-label">YOUR WRITING SPACE</div>
+        <button class="new-button" data-action="new">
+          <span>＋</span> New article <span class="key-hint">N</span>
+        </button>
+        <nav class="primary-nav">
+          <button data-action="drafts" id="drafts-nav" class="nav-active">
+            <span class="nav-icon">▤</span> Drafts
+            <span id="draft-count" class="nav-count">0</span></button
+          ><button data-action="history" id="history-nav">
+            <span class="nav-icon">◷</span> Article history
+            <span id="history-count" class="nav-count">0</span>
+          </button>
+          <button data-action="evals" id="evals-nav">
+            <span class="nav-icon">◴</span> Evaluations
+          </button>
+        </nav>
+        <div class="draft-list-label">RECENT ARTICLES</div>
+        <div id="session-list" class="session-list">
+          <p class="muted small sidebar-loading">Loading your workspace…</p>
+        </div>
+        <div class="sidebar-bottom">
+          <span class="avatar">SV</span>
+          <div>
+            <strong>Your workspace</strong
+            ><span><i class="local-dot"></i> Saved on this device</span>
+          </div>
+        </div>
+      </aside>
+      <div class="workspace">
+        <header class="topbar">
+          <div>
+            <span class="breadcrumb">Workspace</span
+            ><span class="breadcrumb-slash">/</span
+            ><span id="page-location">Draft review</span>
+          </div>
+          <div class="topbar-note">
+            <span class="tiny-leaf">✧</span> A little more thought. A better
+            article.
+          </div>
+        </header>
+        <main id="main" tabindex="-1">
+          <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Opening your writing desk…</p>
+          </div>
+        </main>
+      </div>
+    </div>
+    <dialog id="modal" aria-labelledby="modal-title">
+      <div id="modal-content"></div>
+    </dialog>
+    <div id="toast" role="status" class="toast" hidden></div>
+  </body>
+</html>
