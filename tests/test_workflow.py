@@ -254,6 +254,23 @@ class WorkflowTests(unittest.TestCase):
             self.assertIn("working interpretation", text)
         self.assertIn(DRAFTS.medium, result.medium)
 
+    def test_nonempirical_findings_do_not_require_scientific_evidence(self):
+        self.decisions.scripts["evaluate"] = [report(claims=[dict(
+            claim="A clearly proposed conversation checklist", verdict="not_applicable", evidence_id=None,
+            explanation="A suggestion without a claimed empirical outcome")])]
+        evaluated = DraftEvaluator(self.decisions).evaluate(EditorialBrief(**BRIEF), DRAFTS, SOURCES)
+        self.assertEqual(evaluated.faithfulness, 4)
+        self.assertFalse(any(i.kind == "evidence" and i.severity == "error" for i in evaluated.issues))
+
+    def test_unknown_fetch_request_is_removed_and_report_remains_reviewable(self):
+        self.decisions.scripts["evaluate"] = [report(needs_research=True, fetch_urls=["https://untrusted.example/", str(SOURCES[0].url)],
+            claims=[dict(claim="An unresolved fact", verdict="unsupported", explanation="No supplied evidence")])]
+        evaluated = DraftEvaluator(self.decisions).evaluate(EditorialBrief(**BRIEF), DRAFTS, SOURCES)
+        self.assertEqual(evaluated.fetch_urls, [str(SOURCES[0].url)])
+        self.assertTrue(evaluated.needs_research)
+        self.assertEqual(evaluated.faithfulness, 3)
+        self.assertTrue(any("Ignored evaluator fetch" in i.message for i in evaluated.issues))
+
     def test_failed_search_is_reported_and_retried_from_its_checkpoint(self):
         self.search.search = Mock(side_effect=[RuntimeError("Controlled provider failure"), SOURCES])
         with self.assertRaisesRegex(RuntimeError, "Controlled provider failure"):

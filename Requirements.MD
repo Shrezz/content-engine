@@ -48,6 +48,9 @@ in the order shown in README.md. Publication integrations remain phase 2.
 
 - An independent LLM call evaluates central claims across both drafts, substance,
   voice, structure, and visual consistency. Model judgment is fallible.
+- The critic selects evidence passage IDs; code copies the exact text and URL.
+  Source-attributed direct quotations are checked separately. The schema distinguishes
+  empirical claims from proposals, supplied experiences and illustrative scenes.
 - Code validates supported quote anchors against supplied evidence and checks
   citation URLs, article lengths, embedded-image links, and visual-plan counts.
   Finding a quote does not establish its entailment, credibility, or completeness.
@@ -98,10 +101,15 @@ in the order shown in README.md. Publication integrations remain phase 2.
 - Keep evaluator-only references out of application inputs. Support development
   and held-out splits, per-case checks, saved JSON reports, and a paired baseline
   using the initial single-call draft with the same frozen evidence.
-- The runnable seed contains five intake cases and two technical writing cases.
-  Its frozen source summaries and reference criteria are explicitly **candidate**
-  data. Human review must promote them to gold. Do not claim that the broader
-  36-case Excel scenario plan is already fully curated or evaluated.
+- The current benchmark contains 32 executable cases with user-approved expected
+  behaviors and frozen evidence/state fixtures. Validate hashes and readiness
+  before paid calls. Keep 3 workflow integration checks and 2 deferred platform
+  scenarios outside the benchmark denominator. Preserve prior runs; changed
+  fixtures or grading establish a new baseline. The original 7-case candidate
+  seed remains available for legacy component baseline comparisons.
+- Invalid structured model decisions get at most one schema repair; do not
+  coerce unsupported verdicts to supported. Unknown evaluator fetch URLs are
+  ignored with a visible warning, and are never executed.
 - Component evaluations use frozen evidence; controlled graph tests exercise
   interruptions, retries, duplicate-angle review, research/revision budgets,
   asset/version binding, and approved exports. Live smoke runs verify providers
@@ -147,7 +155,8 @@ in the order shown in README.md. Publication integrations remain phase 2.
 - Calculate precision, recall, F1, agreement, confusion counts and coverage only
   from paired automatic/human results. Undefined denominators remain unavailable.
 - Show previous frozen-dataset reports and allow selected dev/test cases and an
-  optional initial-draft baseline. Explain per-case pass/fail, route, critic and rubric checks.
+  optional initial-draft baseline only for the legacy component seed. Explain
+  per-case pass/fail, route, critic and rubric checks.
 - Persist benchmark state and JSON results; interrupted jobs never rerun automatically.
-- Keep candidate-reference status visible. Do not equate software test passes,
+- Keep the actual dataset reference-review status visible. Do not equate software test passes,
   LLM rubric scores, or reviewed production versions with certified held-out quality.

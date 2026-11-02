@@ -1,5 +1,5 @@
 {
-  "version": "0.4-frozen-2026-11-01",
+  "version": "0.4.1-frozen-2026-11-01",
   "reference_status": "Expected behaviors approved by the user; all 32 execution fixtures prepared. Source summaries and corrected grading boundaries establish a new baseline.",
   "sources": {
     "workflows": {
@@ -409,6 +409,16 @@
       "sha256": "9085edb4f12a4db37d915fbe5702506badc8d0e25fc0ce6c61cbbea2b76f27b3",
       "frozen_on": "2026-11-01",
       "provenance": "Primary source reviewed during fixture preparation; summary is not the full publication."
+    },
+    "med-brief": {
+      "source": {
+        "title": "Yilmaz Balban et al. — Brief structured respiration and mindfulness meditation",
+        "url": "https://doi.org/10.1016/j.xcrm.2022.100895",
+        "content": "Curated summary of the original randomized study, not a verbatim excerpt. Frozen 2026-11-01. This remotely conducted study compared three daily five-minute breathwork practices with five-minute mindfulness meditation over one month. The mindfulness group attended to breathing without deliberately controlling it. The study reported reduced state anxiety after sessions in all groups; breathwork, particularly cyclic sighing, had greater positive-affect and respiratory-rate effects than mindfulness meditation. These are measured group findings in a specific protocol, not evidence that stress disappears for everyone. Mindfulness meditation and deliberate breath control are different interventions. Within-group changes cannot establish superiority to an untreated group, and the trial does not establish a universal benefit for working parents or long-term clinical outcomes."
+      },
+      "sha256": "255ee7acd1f0bdd7bc4fafd51e36ab4c5339c464be9348985bcdd5ef3f634b38",
+      "frozen_on": "2026-11-01",
+      "provenance": "Reviewed primary randomized study; curated summary, not the full publication."
     }
   },
   "cases": [
@@ -784,7 +794,8 @@
           "med-methods",
           "med-small",
           "med-null",
-          "med-anxiety"
+          "med-anxiety",
+          "med-brief"
         ],
         "require_quality": true
       },
@@ -796,7 +807,7 @@
       "expected_decisions": [
         "human_review"
       ],
-      "fixture_hash": "d6cbcc4182116cab212834c3db4abda394c1594851d90599f3e9a5186322270f"
+      "fixture_hash": "15d4fc1345629808fef2d010f613995dd14cc45d27d3ae1c826072f12ff90ec6"
     },
     {
       "id": "CE-011",
@@ -894,7 +905,8 @@
           "med-methods",
           "med-small",
           "med-null",
-          "med-anxiety"
+          "med-anxiety",
+          "med-brief"
         ],
         "require_quality": false
       },
@@ -907,7 +919,7 @@
         "human_review",
         "research_review"
       ],
-      "fixture_hash": "c78e4f608e913ea7b8e5d8a2f407f3929b3d98c352f4c4746771b90412ecaefa"
+      "fixture_hash": "2852e52d5c91d9f81dc6ef8638a5419fa6efee77daed9047e15bc80d8c06b084"
     },
     {
       "id": "CE-013",
@@ -1029,7 +1041,8 @@
           "med-methods",
           "med-small",
           "med-null",
-          "med-anxiety"
+          "med-anxiety",
+          "med-brief"
         ],
         "require_quality": false
       },
@@ -1039,10 +1052,11 @@
         "Must avoid these failure conditions: Repeat the guarantee as fact, invent a supporting trial, or let the requested angle override factual grounding."
       ],
       "expected_decisions": [
+        "clarification",
         "human_review",
         "research_review"
       ],
-      "fixture_hash": "78579f7dcfe470b9a3eeff88b3103d3b2b3abf45cef3e89ce2ef92daba539d5a"
+      "fixture_hash": "2df6eed1c533fe381a20f953251f2b3423e580e943f9a6c0d990d1708873b286"
     },
     {
       "id": "CE-020",
@@ -1104,7 +1118,8 @@
           "med-methods",
           "med-small",
           "med-null",
-          "med-anxiety"
+          "med-anxiety",
+          "med-brief"
         ],
         "require_quality": true
       },
@@ -1116,7 +1131,7 @@
       "expected_decisions": [
         "human_review"
       ],
-      "fixture_hash": "d6cbcc4182116cab212834c3db4abda394c1594851d90599f3e9a5186322270f"
+      "fixture_hash": "15d4fc1345629808fef2d010f613995dd14cc45d27d3ae1c826072f12ff90ec6"
     },
     {
       "id": "CE-022",
@@ -1140,7 +1155,8 @@
           "med-methods",
           "med-small",
           "med-null",
-          "med-anxiety"
+          "med-anxiety",
+          "med-brief"
         ],
         "require_quality": true
       },
@@ -1152,7 +1168,7 @@
       "expected_decisions": [
         "human_review"
       ],
-      "fixture_hash": "d76436e8a2cacb51354b7a146ec8b4691066c4529c5925c84cffbd4af6815c99"
+      "fixture_hash": "114acb3e9f5280595ed7a181011beb2421a8c319df4823b0ec4b12ad847d2645"
     },
     {
       "id": "CE-023",
@@ -1792,53 +1808,31 @@
         ],
         "require_quality": true,
         "starting_drafts": {
-          "linkedin": "# Where Human Approval Fits in AI Agent Workflows\n\nImagine an AI agent that updates household task records—assigning chores, rescheduling deliveries, or adjusting shared calendars. It’s efficient, proactive, and occasionally wrong. When should a human step in? And what do they need to see to make a meaningful decision?\n\nFor software engineers building agents that modify application data, inserting human approval isn’t just about safety—it’s about designing for clarity, accountability, and recoverability.\n\nUsing tools like LangGraph, you can interrupt execution before a tool call using `interrupt()`. This pause exposes a serializable payload—say, a proposed database update. But the real design challenge isn’t the interrupt; it’s what happens next. The human reviewer needs context: what was the goal? What alternatives were considered? What side effects might follow?\n\nThe approval interface should show the intended change, the agent’s reasoning (traced via OpenTelemetry), and the current state of the affected record. Rejection shouldn’t just block the action—it should feed back into the system, perhaps triggering a revision loop or alerting a fallback process.\n\nTradeoffs exist: interruptions add latency, and overuse erodes trust in automation. For changes with potential ripple effects—like altering a recurring task—pausing for review makes sense. Use checkpointers to persist state so reviews can happen asynchronously. And ensure pre-interrupt side effects are idempotent—don’t charge a subscription before asking for consent.\n\nThe goal isn’t to stop the agent—it’s to make approval a first-class part of the workflow, where humans see enough to decide, and systems learn from every ‘no’.",
-          "medium": "# Where Human Approval Belongs in AI Agent Workflows\n\nImagine this: your household AI agent notices that no one has done the weekly grocery shopping. It checks preferences, finds a pattern, and decides to reschedule the delivery—from Tuesday to Thursday—so it aligns with when someone’s usually home. It’s a small change. Logical. Helpful.\n\nBut what if Thursday is when the neighbor picks up their share? What if the user had quietly decided to delay the order? The agent didn’t know. And now, without oversight, it made a change that disrupts a hidden agreement.\n\nThis is the quiet risk of autonomous agents: they optimize for efficiency, not empathy. When AI begins modifying application data—updating calendars, reassigning tasks, adjusting shared lists—errors aren’t just bugs. They’re broken trust.\n\nSo where should human approval fit in? And what must the reviewer see to make a meaningful decision?\n\n## The Workflow: More Than Just a Pause\n\nModern agent frameworks like LangGraph allow developers to insert interrupts before tool calls using `interrupt()` [LangGraph interrupts](https://docs.langchain.com/oss/python/langgraph/interrupts). When triggered, execution pauses and exposes a serializable payload—the proposed action, its parameters, and context.\n\nBut a pause is not the same as a decision point. For approval to be meaningful, the human must understand:\n\n- **Intent**: Why is this change being made?\n- **Context**: What data led to this decision?\n- **Impact**: What other records or routines might be affected?\n- **Alternatives**: Were other options considered?\n\nThis information doesn’t emerge automatically. It must be designed into the workflow.\n\n## A Concrete Design Pattern\n\nConsider a household task management agent. When it proposes changing a recurring chore assignment, the workflow looks like this:\n\n1. **Plan**: The agent generates a candidate action (e.g., reassign “Take out trash” from Alex to Sam).\n2. **Evaluate**: A validation node checks business rules (e.g., Sam isn’t already overloaded).\n3. **Interrupt**: If the change affects shared routines or recurring events, the system calls `interrupt()` with a structured payload.\n4. **Persist**: A checkpointer saves the full graph state, including history and thread_id [LangGraph persistence](https://docs.langchain.com/oss/python/langgraph/persistence).\n5. **Review**: A UI presents the change, the agent’s reasoning, and the current household schedule.\n6. **Decide**: The user approves or rejects. Their response is fed back via `resume()`.\n7. **Act or Adapt**: On approval, the tool executes. On rejection, the agent enters a revision loop or notifies a fallback handler.\n\n```mermaid\ngantt\n    title Agent Workflow with Human Approval\n    dateFormat  X\n    axisFormat %s\n    section Agent Flow\n    Plan Action        : 0, 10\n    Evaluate Safety    : 10, 20\n    Interrupt for Review : 20, 30\n    Wait for Human     : 30, 100\n    Resume on Decision : 100, 110\n    Execute or Revise  : 110, 130\n```\n\n## What the Reviewer Needs to See\n\nA simple “Approve/Deny” prompt fails because it lacks context. Instead, the review interface should include:\n\n- The **proposed change** (structured diff of the record)\n- The **agent’s reasoning trace**, pulled from OpenTelemetry spans [OpenTelemetry traces](https://opentelemetry.io/docs/concepts/signals/traces/)\n- The **current state** of related records (e.g., Sam’s other tasks)\n- A **confidence score** or uncertainty flag from the agent\n\nThis transforms approval from a gate into a collaboration.\n\n## Tradeoffs and Practical Considerations\n\n- **Latency**: Interrupts introduce delays. Reserve them for changes that affect shared, recurring, or irreversible records—avoid interrupting low-risk updates.\n- **State Management**: Without a durable checkpointer, you lose context if the process restarts. Ensure checkpoint storage is reliable and separate from business data [LangGraph persistence](https://docs.langchain.com/oss/python/langgraph/persistence).\n- **Idempotency**: Avoid non-idempotent side effects before an interrupt. Don’t send a notification or charge a fee before approval—the node may rerun on resume [LangGraph interrupts](https://docs.langchain.com/oss/python/langgraph/interrupts).\n- **Feedback Loops**: Rejections should train the system. Log them. Analyze patterns. Use them to refine future proposals.\n- **Evaluation Beyond Text**: As NVIDIA notes, true agent success is measured by task completion, not just correct tool calls [How to evaluate AI agents — NVIDIA](https://developer.nvidia.com/blog/how-to-evaluate-ai-agents-from-tool-calls-to-task-completion). Did the change actually help the household?\n\n## Conclusion: Approval as a Design Primitive\n\nHuman approval shouldn’t be an afterthought—an emergency brake. It should be a first-class element of agent design: intentional, informative, and integrated.\n\nWhen engineers treat approval as part of the workflow, they build systems that are not just capable, but trustworthy.\n\n**Call to action**: Next time you design an agent that changes data, ask: *What would a human need to know before saying yes?* Then build that view first.",
-          "visuals": [
-            {
-              "platform": "medium",
-              "placement": "After the 'A Concrete Design Pattern' section, before the Mermaid diagram",
-              "description": "A sequence diagram showing the flow between agent, checkpointer, interrupt handler, and human reviewer, with labeled steps: plan, evaluate, interrupt, persist, review, resume, act.",
-              "caption": "Agent workflow with human approval: steps and system interactions.",
-              "alt_text": "Sequence diagram of AI agent workflow with human approval step, showing interaction between components.",
-              "mermaid": null
-            },
-            {
-              "platform": "medium",
-              "placement": "After the Mermaid diagram",
-              "description": "A screenshot-style mockup of a review interface showing a proposed task change, agent reasoning ('Sam is home more on Wednesdays'), current schedule conflict warning, and approve/edit/reject buttons.",
-              "caption": "Example review interface for a household task change, designed to support informed decisions.",
-              "alt_text": "UI mockup of a human review screen for an AI-proposed chore reassignment, showing context and options.",
-              "mermaid": null
-            },
-            {
-              "platform": "medium",
-              "placement": "After the 'What the Reviewer Needs to See' section",
-              "description": "Mermaid Gantt chart showing the timeline of agent execution, interruption, human review window, and resumption.",
-              "caption": "Timeline of agent workflow with asynchronous human review period.",
-              "alt_text": "Gantt chart illustrating pauses in agent execution for human review.",
-              "mermaid": "gantt\\n    title Agent Workflow with Human Approval\\n    dateFormat  X\\n    axisFormat %s\\n    section Agent Flow\\n    Plan Action        : 0, 10\\n    Evaluate Safety    : 10, 20\\n    Interrupt for Review : 20, 30\\n    Wait for Human     : 30, 100\\n    Resume on Decision : 100, 110\\n    Execute or Revise  : 110, 130"
-            }
-          ],
-          "research_gaps": [
-            "The sources do not provide a framework for classifying which changes require human approval—particularly how to distinguish high-impact from low-risk actions in household task systems. While recurring or shared changes are plausible candidates, no criteria or evaluation method is specified.",
-            "There is limited guidance on how to summarize agent reasoning for non-technical users in a way that supports accurate decision-making without cognitive overload. OpenTelemetry spans provide data, but translating them into actionable context remains an open design challenge.",
-            "While checkpointers enable resumable threads, the interaction between checkpoint persistence and application-level transactionality (e.g., ensuring a change isn’t applied twice) is not addressed. This creates uncertainty around idempotency and consistency when resuming interrupted workflows."
-          ]
+          "linkedin": "# Reviewing a proposed household-task change\n\nImagine an assistant proposing to move a household task to tomorrow. The household member needs to see the proposed change before the application applies it. This article describes a proposed application design, rather than a framework guarantee or an experimentally tested policy.\n\n## Pause before the change\n\nLangGraph interrupts can pause execution, expose a serializable payload and resume the same thread. A durable pause uses a checkpointer and a thread identifier. Work before an interrupt can run again, so side effects need appropriate placement or idempotency. These are the supplied documentation's capabilities and constraints. [LangGraph interrupts](https://docs.langchain.com/oss/python/langgraph/interrupts)\n\n## A proposed decision payload\n\nFor this example, I propose showing the task identifier, the current value, the proposed value and the record version. The reviewer could approve, reject or request a revision. This is an application interface proposal, not a claim that the framework automatically validates those fields. On rejection, the application would retain the existing record and return the proposal for revision.\n\n## Check what was approved\n\nI propose binding approval to the displayed proposal version. Immediately before applying the change, the application would compare the record version with the reviewed version. A mismatch would require a fresh decision. The application must implement this rule; saving a checkpoint alone does not provide it. Persistence supplies execution state for resumption. [LangGraph persistence](https://docs.langchain.com/oss/python/langgraph/persistence)\n\n## Verify the result\n\nAfter an approved change, the application can check whether the intended record contains the expected value. This example is hypothetical and claims no measured productivity or relationship benefit. Before building an interface, choose one reversible household-task operation and specify its approval and rejection paths.\n",
+          "medium": "# Reviewing a proposed household-task change\n\nImagine an assistant proposing to move a household task to tomorrow. The household member needs to see the proposed change before the application applies it. This article describes a proposed application design, rather than a framework guarantee or an experimentally tested policy.\n\n## Pause before the change\n\nLangGraph interrupts can pause execution, expose a serializable payload and resume the same thread. A durable pause uses a checkpointer and a thread identifier. Work before an interrupt can run again, so side effects need appropriate placement or idempotency. These are the supplied documentation's capabilities and constraints. [LangGraph interrupts](https://docs.langchain.com/oss/python/langgraph/interrupts)\n\n## A proposed decision payload\n\nFor this example, I propose showing the task identifier, the current value, the proposed value and the record version. The reviewer could approve, reject or request a revision. This is an application interface proposal, not a claim that the framework automatically validates those fields. On rejection, the application would retain the existing record and return the proposal for revision.\n\n## Check what was approved\n\nI propose binding approval to the displayed proposal version. Immediately before applying the change, the application would compare the record version with the reviewed version. A mismatch would require a fresh decision. The application must implement this rule; saving a checkpoint alone does not provide it. Persistence supplies execution state for resumption. [LangGraph persistence](https://docs.langchain.com/oss/python/langgraph/persistence)\n\n## Verify the result\n\nAfter an approved change, the application can check whether the intended record contains the expected value. This example is hypothetical and claims no measured productivity or relationship benefit. Before building an interface, choose one reversible household-task operation and specify its approval and rejection paths.\n",
+          "visuals": [],
+          "research_gaps": []
         },
         "starting_evaluation": {
           "claims": [],
           "faithfulness": 4,
-          "substance": 4,
+          "substance": 3,
           "voice": 4,
-          "structure": 4,
+          "structure": 3,
           "needs_research": false,
-          "issues": [],
+          "issues": [
+            {
+              "kind": "editorial",
+              "severity": "error",
+              "message": "Controlled starting fixture is short and needs a fuller Medium explanation."
+            }
+          ],
           "followup_queries": [],
           "fetch_urls": []
         },
         "feedback": "Make the approval decision concrete: show what happens if the household task record changes after review, explain the rejection path, and make both articles meet the configured word ranges. Treat these as proposed application rules.",
-        "manual_edit": "Proposed review question: has the underlying task changed since this version was prepared? If so, ask for a fresh decision instead of applying stale approval."
+        "manual_edit": "Proposed review question: has the underlying task changed since this version was prepared? If so, ask for a fresh decision instead of applying stale approval.",
+        "fixture_provenance": "Hand-curated synthetic draft from the real approval-design request. At the exhausted automatic revision budget it awaits final review with known editorial findings. This is not a passing article or actual human approval."
       },
       "definition_approved": true,
       "criteria": [
@@ -1848,7 +1842,7 @@
       "expected_decisions": [
         "fresh_review"
       ],
-      "fixture_hash": "f89730c08a98994cb72f2f6130f356c979857c7e8336abe778b65abed70cd376"
+      "fixture_hash": "7b0bd3c05d26c5f91c83b87fd69b2c4f325580acb2192b0f7d2d801a5aaa1ce1"
     }
   ],
   "changes": [
@@ -1858,7 +1852,10 @@
     "Fourteen missing evidence/archive/review fixtures prepared from primary sources and controlled application state.",
     "CE-006 and CE-009 use attributable conditional design alternatives; no fabricated conflict. CE-012 preserves differing structural findings and study designs.",
     "Synthetic revision feedback and labels are isolated from actual human article labels.",
-    "First 18-case rerun and full 32-case baseline must be reported separately."
+    "First 18-case rerun and full 32-case baseline must be reported separately.",
+    "Added an authentic five-minute meditation comparison study to the short-practice source package; no universal benefit is asserted.",
+    "CE-019 permits an honest intake clarification that rejects the guarantee and offers a grounded direction. The approved expected behavior is unchanged; an overrestrictive route check is corrected.",
+    "CE-042 now starts from an explicitly short, grounded synthetic review fixture with editorial findings, instead of labelling an old factually problematic article as passing."
   ],
   "excluded": [],
   "deferred": [

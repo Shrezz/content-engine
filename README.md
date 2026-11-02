@@ -75,7 +75,7 @@ absolute executable path. Credentials are never included in settings reprs;
 # A broad topic pauses for one focused clarification question.
 uv run python -m content_engine start 'Write an article on meditation.' --id meditation-01
 
-# A complete brief skips the intake LLM call.
+# A structured brief is validated for shape and editorial meaning before research.
 uv run python -m content_engine start --brief examples/brief.json --id agent-evals-01
 
 # Read persisted state without a search or model call.
@@ -208,7 +208,11 @@ a pending human decision. Review actions validate before consuming the interrupt
   characters per excerpt. Rank and count do not establish source quality.
 - The independent evaluator checks central claims, quote anchors, citations,
   substance, voice, structure, and visual plans. Code checks length and source
-  URLs; a supported quote must exist exactly in the supplied source content.
+  URLs. The model selects evidence IDs; code copies the exact passage and URL.
+  Source-attributed direct quotations receive a separate text check. Clearly
+  labelled proposals, supplied vignettes and opinions are not empirical claims.
+  Unknown fetch requests are removed and reported, preserving the critic report.
+  A schema-invalid decision gets at most one repair call; it is never coerced to pass.
 - One automatic deeper pass can run up to two focused searches and fetch up to
   two known URLs. A fetched excerpt is capped at 16,000 characters. With defaults,
   the accumulated pool is at most 24 sources. Search/fetch cannot supply arbitrary
@@ -279,7 +283,7 @@ make the sample visible. These are descriptive metrics over reviewed versions,
 not an unbiased estimate of performance on new topics.
 
 **Dataset runs** contains saved CLI reports and new benchmarks. Select a split
-and cases; optionally compare the initial writing draft against its revisions.
+and cases. The legacy component seed also supports an initial-draft baseline.
 Running uses model credits, frozen evidence, and no live search. Each case gets
 a binary result, expected/actual route, rubric explanations, and actual output.
 Suite pass rate is separate from the human-labelled article metrics. Background
@@ -298,12 +302,29 @@ uv run python -m content_engine evaluate evals/golden.json --split dev --baselin
 uv run python -m content_engine evaluate evals/golden.json --split test --case INT-002
 ```
 
-`evals/golden.json` is a runnable **candidate seed**, with five intake scenarios,
-two technical writing scenarios, frozen evidence, and evaluator-only criteria.
-The existing 36-scenario Excel workbook is the broader coverage plan, not 36
-fully curated executable fixtures. Source content in the seed is explicitly
-marked as curated summaries of primary sources, not verbatim page excerpts.
-References require human review before promotion to gold.
+`evals/golden-v0.4.json` is the current 32-case benchmark used by the UI.
+It includes the user-approved expected behaviors, frozen source summaries,
+controlled archive/review states, input/source hashes, and dev/test splits.
+`evaluation_cases.py` runs the actual graph and model components while substituting
+frozen search responses. All selected fixtures are validated before model calls.
+The three rendering/attachment/approval checks in `tests/test_dataset_fixtures.py`
+are counted separately. The two phase-2 platform cases remain deferred.
+
+The current fixture revision is 0.4.1. Its short-practice package includes an
+original five-minute mindfulness comparison study. Source summaries are labelled
+as summaries, not full publications or verbatim quotations. The earlier 18-case
+reports and the first full-suite report remain saved; changes in fixtures and
+grading establish a new baseline rather than a like-for-like improvement delta.
+Human article labels stay blank until actual review. Synthetic approval and
+revision labels used by workflow tests stay in isolated test databases.
+
+`evals/golden.json` retains the original seven-case candidate component seed
+and its optional initial-draft baseline. To run the current suite:
+
+```sh
+uv run python -m content_engine evaluate evals/golden-v0.4.json --split all
+uv run python -m content_engine evaluate evals/golden-v0.4.json --split dev --case CE-032
+```
 
 Writing cases use the frozen sources rather than live search, enabling a
 repeatable component comparison. Reference criteria never enter the writer

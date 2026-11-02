@@ -10,6 +10,8 @@ from content_engine.evals import GoldenEvaluator, ReferenceGrade
 from content_engine.models import DraftPackage, EditorialBrief, EvaluationReport, IntakeDecision
 from content_engine.tracing import RunTrace
 from content_engine.writer import WritingNode
+from content_engine.decisions import DecisionClient
+from pydantic import ValidationError
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -87,6 +89,27 @@ class EvaluationTests(unittest.TestCase):
         self.assertEqual(data["evaluation_target"], "critic")
         self.assertEqual(data["original_input"], inputs)
         self.assertNotIn("evaluation", data["actual_output"])
+
+    def test_invalid_decision_gets_one_schema_repair_without_coercing_verdict(self):
+        calls = []
+        responses = iter(['{"checks":[{"criterion":"One","reason":"Unsupported","verdict":"partially met"}]}',
+                          '{"checks":[{"criterion":"One","reason":"Unsupported","verdict":"not_met"}]}'])
+        def complete(system, prompt, *, name):
+            calls.append((name, prompt))
+            return next(responses)
+        grade = DecisionClient(complete).ask("grade", "Use supplied evidence", ReferenceGrade, {})
+        self.assertEqual(grade.checks[0].verdict, "not_met")
+        self.assertEqual([c[0] for c in calls], ["grade", "grade_repair"])
+        self.assertIn("validation_errors", calls[1][1])
+
+    def test_invalid_decision_does_not_retry_indefinitely(self):
+        calls = []
+        def complete(system, prompt, *, name):
+            calls.append(name)
+            return '{}'
+        with self.assertRaises(ValidationError):
+            DecisionClient(complete).ask("grade", "Use supplied evidence", ReferenceGrade, {})
+        self.assertEqual(calls, ["grade", "grade_repair"])
 
     def test_split_and_case_filters_do_not_run_development_examples(self):
         with tempfile.TemporaryDirectory() as temp:
