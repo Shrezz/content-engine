@@ -1,0 +1,11 @@
+.venv/
+.env
+.env.*
+!.env.example
+__pycache__/
+*.py[cod]
+data/
+work/
+.DS_Store
+node_modules/
+.pnpm-store/
